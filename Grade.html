@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calculate Grade</title>
+<style>
+  body{
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #f2f2f2;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+
+  .box{
+    max-width: 850px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 50px 55px;
+  }
+
+  h2{
+    margin-top: 0;
+    font-size: 30px;
+  }
+
+  label{
+    font-size: 18px;
+  }
+
+  input[type="text"]{
+    font-family: Georgia, serif;
+    font-size: 20px;
+    padding: 10px 12px;
+    width: 320px;
+  }
+
+  button{
+    font-family: Georgia, serif;
+    font-size: 18px;
+    padding: 10px 20px;
+    margin-left: 24px;
+  }
+
+  #result{
+    margin-top: 20px;
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Calculate Grade</h2>
+
+  <label>Enter Amount:</label>
+  <input type="text" id="score">
+  <button onclick="calculateGrade()">Submit</button>
+
+  <p id="result"></p>
+</div>
+
+<script>
+  function calculateGrade(){
+    const score = parseFloat(document.getElementById('score').value);
+    const result = document.getElementById('result');
+
+    if(isNaN(score)){
+      result.textContent = 'Please enter a valid number';
+      return;
+    }
+
+    if(score < 0 || score > 100){
+      result.textContent = 'Please enter a score between 0 and 100';
+      return;
+    }
+
+    if(score >= 85){
+      result.textContent = 'You got an A';
+    } else if(score >= 75){
+      result.textContent = 'You got a B';
+    } else {
+      result.textContent = 'Score is below B';
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter — Calibration Panel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root{
+    --ink: #1B2430;
+    --panel: #232F3F;
+    --brass: #C08A3E;
+    --brass-dim: #8a642e;
+    --paper: #F0EDE5;
+    --slate: #7C8A9C;
+    --line: #34445A;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background: var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(192,138,62,0.06), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(192,138,62,0.05), transparent 40%);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+
+  .panel{
+    width:100%;
+    max-width: 560px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 28px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--brass);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 24px;
+    color: var(--paper);
+  }
+
+  .tabs{
+    display:flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+
+  .tab{
+    flex:1;
+    background: none;
+    border: none;
+    color: var(--slate);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    padding: 10px 4px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .tab:hover{ color: var(--paper); }
+
+  .tab.active{
+    color: var(--brass);
+    border-color: var(--brass);
+  }
+
+  .field-row{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  input[type="number"]{
+    flex:1;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="number"]:focus{
+    border-color: var(--brass);
+  }
+
+  .unit-label{
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--slate);
+    font-size: 14px;
+    width: 44px;
+    text-align:center;
+  }
+
+  .arrow{
+    color: var(--brass);
+    font-size: 18px;
+  }
+
+  /* Scale / caliper signature element */
+  .scale-wrap{
+    margin: 20px 0 24px;
+    padding: 18px 16px 14px;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .scale-track{
+    position: relative;
+    height: 30px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tick{
+    position:absolute;
+    bottom:0;
+    width:1px;
+    background: var(--line);
+  }
+  .tick.major{ height: 16px; background: var(--slate); }
+  .tick.minor{ height: 8px; }
+
+  .caliper{
+    position:absolute;
+    top:0;
+    bottom:-1px;
+    width: 2px;
+    background: var(--brass);
+    transition: left 0.25s ease;
+  }
+  .caliper::after{
+    content:'';
+    position:absolute;
+    top:-6px;
+    left:-4px;
+    width:10px;
+    height:10px;
+    background: var(--brass);
+    transform: rotate(45deg);
+    border-radius:2px;
+  }
+
+  .readout{
+    display:flex;
+    justify-content: space-between;
+    align-items:baseline;
+    margin-top: 20px;
+  }
+
+  .readout-value{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--brass);
+  }
+
+  .readout-unit{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--slate);
+  }
+
+  .error{
+    color: #d97757;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .note{
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.5;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+
+  .note code{
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--brass-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="eyebrow">Calibration Panel</div>
+  <h1>Unit Converter</h1>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-mode="inchToCm">Inches → cm</button>
+    <button class="tab" data-mode="mileToFeet">Miles → feet</button>
+    <button class="tab" data-mode="kmToFeet">Km → feet</button>
+  </div>
+
+  <div class="field-row">
+    <input type="number" id="input" placeholder="0" step="any" />
+    <span class="unit-label" id="inputUnit">in</span>
+    <span class="arrow">→</span>
+    <span class="unit-label" id="outputUnit">cm</span>
+  </div>
+
+  <div class="scale-wrap">
+    <div class="scale-track" id="track">
+      <div class="caliper" id="caliper" style="left:0%"></div>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div>
+      <div class="readout-value" id="result">0.00</div>
+      <div class="readout-unit" id="resultUnit">cm</div>
+    </div>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  </div>
+</div>
+
+<script>
+  // --- Same logic as assignment.js ---
+  const UnitConverter = {
+    inchToCm: (inches) => {
+      if (typeof inches !== 'number') return 'Input must be a number';
+      return inches * 2.54;
+    },
+    mileToFeet: (miles) => {
+      if (typeof miles !== 'number') return 'Input must be a number';
+      return miles * 5280;
+    },
+    kmToFeet: (km) => {
+      if (typeof km !== 'number') return 'Input must be a number';
+      return km * 3280.839895;
+    }
+  };
+
+  const modes = {
+    inchToCm: { inUnit: 'in', outUnit: 'cm', max: 20, fn: UnitConverter.inchToCm },
+    mileToFeet: { inUnit: 'mi', outUnit: 'ft', max: 10, fn: UnitConverter.mileToFeet },
+    kmToFeet: { inUnit: 'km', outUnit: 'ft', max: 10, fn: UnitConverter.kmToFeet }
+  };
+
+  let currentMode = 'inchToCm';
+
+  const tabsEl = document.getElementById('tabs');
+  const inputEl = document.getElementById('input');
+  const inputUnitEl = document.getElementById('inputUnit');
+  const outputUnitEl = document.getElementById('outputUnit');
+  const resultEl = document.getElementById('result');
+  const resultUnitEl = document.getElementById('resultUnit');
+  const errorEl = document.getElementById('errorMsg');
+  const trackEl = document.getElementById('track');
+  const caliperEl = document.getElementById('caliper');
+
+  function buildTicks(){
+    trackEl.querySelectorAll('.tick').forEach(t => t.remove());
+    const count = 21; // 0..20, major every 5
+    for(let i=0;i<count;i++){
+      const tick = document.createElement('div');
+      tick.className = 'tick ' + (i % 5 === 0 ? 'major' : 'minor');
+      tick.style.left = (i/(count-1))*100 + '%';
+      trackEl.insertBefore(tick, caliperEl);
+    }
+  }
+
+  function update(){
+    const cfg = modes[currentMode];
+    inputUnitEl.textContent = cfg.inUnit;
+    outputUnitEl.textContent = cfg.outUnit;
+    resultUnitEl.textContent = cfg.outUnit;
+
+    const raw = inputEl.value;
+    if(raw === ''){
+      resultEl.textContent = '0.00';
+      errorEl.textContent = '';
+      caliperEl.style.left = '0%';
+      return;
+    }
+
+    const num = parseFloat(raw);
+    const output = cfg.fn(num);
+
+    if(typeof output === 'string'){
+      errorEl.textContent = output;
+      resultEl.textContent = '—';
+      caliperEl.style.left = '0%';
+      return;
+    }
+
+    errorEl.textContent = '';
+    resultEl.textContent = output.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+    const pct = Math.max(0, Math.min(100, (num / cfg.max) * 100));
+    caliperEl.style.left = pct + '%';
+  }
+
+  tabsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if(!btn) return;
+    tabsEl.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    update();
+  });
+
+  inputEl.addEventListener('input', update);
+
+  buildTicks();
+  update();
+</script>
+
+</body>
+</html>
